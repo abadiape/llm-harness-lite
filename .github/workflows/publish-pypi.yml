@@ -1,0 +1,26 @@
+name: publish-pypi
+# Trusted Publishing (OIDC, no API token needed).
+# One-time setup: PyPI > your project > Settings > Publishing > Add GitHub publisher:
+#   owner = abadiape, repo = llm-harness-lite, workflow = publish-pypi.yml, env = pypi
+# Then: git tag v0.1.0a1 && git push --tags  -> builds + uploads to PyPI, reserves the name.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write  # required for OIDC
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"
+      - run: pip install -U build
+      - run: python -m build
+      - uses: pypa/gh-action-pypi-publish@release/v1

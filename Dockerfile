@@ -1,5 +1,5 @@
 # App image for prod / collaborators who want full-docker. For daily dev, use venv + compose db only.
-FROM python:3.11-slim
+FROM python:3.15-slim
 WORKDIR /app
 COPY pyproject.toml README.md ./
 COPY src/ src/

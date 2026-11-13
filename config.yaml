@@ -9,7 +9,7 @@ embed:
   model: nomic-embed-text
   base_url: http://localhost:11434
 store:
-  kind: pgvector             # pgvector | qdrant  (same Retriever API)
+  kind: pgvector             # local default; qdrant is the production option
   pgvector:
     dsn: postgresql://harness:harness@localhost:5432/harness
     table: rag_chunks

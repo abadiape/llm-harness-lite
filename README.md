@@ -8,11 +8,42 @@ config.yaml → llm/factory → agent/loop → tools/registry (+ RAG as tool, MC
 
 ## Install
 ```bash
-pip install llm-harness-lite
+pip install llm-harness-lite                 # dependency-free core
+pip install "llm-harness-lite[openai]"       # OpenAI-compatible providers
+pip install "llm-harness-lite[anthropic]"    # Anthropic
+pip install "llm-harness-lite[pgvector]"     # PostgreSQL + pgvector RAG
+pip install "llm-harness-lite[qdrant]"       # Qdrant RAG
+pip install "llm-harness-lite[mcp]"          # MCP client
+pip install "llm-harness-lite[full]"         # all integrations + example config deps
 # or local dev:
 # python -m venv .venv && source .venv/bin/activate
-# pip install -e ".[dev]"
-# docker compose up -d db qdrant
+# pip install -e ".[dev,examples,openai,ollama,pgvector]"
+# docker compose up -d db
+```
+
+The core package uses only the Python standard library. Provider SDKs, vector
+database clients, and the MCP SDK are optional; install only the extras your
+application uses. OpenAI-compatible providers (including Ollama and vLLM) use
+the `openai` extra.
+
+## RAG portability
+
+The initial supported vector stores are intentionally limited to **pgvector**
+and **Qdrant**. The default local setup uses pgvector; Qdrant is the production
+deployment option. Both implement the same `VectorStore` contract and plug into
+the same `Retriever`. Embedding generation is separate from both storage and
+chat-model choice, so users own their vectors and can change LLM providers
+without binding retrieval to a model vendor.
+
+Run `docker compose up -d qdrant` only when testing the Qdrant path. The Qdrant
+client is available through the `qdrant` extra.
+
+Custom providers can implement the `LLMBackend` protocol and register a factory
+without changing the library:
+
+```python
+harness.register_provider("my-runtime", MyBackend)
+llm = harness.create_llm("my-runtime", "model-name", endpoint="http://localhost")
 ```
 
 ## Use (short alias supported)

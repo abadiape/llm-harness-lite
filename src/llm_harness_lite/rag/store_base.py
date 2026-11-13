@@ -1,7 +1,9 @@
-"""Shared RAG store contract. All backends (pgvector, Qdrant, ...) implement VectorStore."""
+"""Shared RAG contract for the supported pgvector and Qdrant stores."""
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any, Protocol
+
 
 @dataclass
 class Record:
@@ -17,7 +19,7 @@ class VectorStore(Protocol):
                filters: dict[str, Any] | None = None) -> list[Record]: ...
 
 def create_store(kind: str, **kw):
-    """Factory to keep retriever code backend-agnostic. Contributors add cases here."""
+    """Create one of the supported vector stores for use with the shared Retriever."""
     if kind == "pgvector":
         from llm_harness_lite.rag.store_pgvector import PgVectorStore
         return PgVectorStore(kw["dsn"], kw.get("table", "rag_chunks"), kw.get("dim", 768))

@@ -9,22 +9,29 @@ license = { text = "MIT" }
 description = "LLM Harness Lite — lightweight universal agent + RAG + MCP for any LLM (local-first, cost-aware)"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
+dependencies = []
+
+[project.optional-dependencies]
+openai = ["openai>=1.30.0"]
+anthropic = ["anthropic>=0.40.0"]
+pgvector = ["psycopg[binary]>=3.1", "pgvector>=0.3.5"]
+qdrant = ["qdrant-client>=1.9.0"]
+ollama = ["ollama>=0.2.0"]
+ollama-embed = ["ollama>=0.2.0"]
+mcp = ["mcp>=1.0.0"]
+examples = ["pyyaml>=6.0", "python-dotenv>=1.0.0"]
+full = [
   "openai>=1.30.0",
   "anthropic>=0.40.0",
   "psycopg[binary]>=3.1",
   "pgvector>=0.3.5",
-  "pyyaml>=6.0",
-  "tiktoken>=0.7.0",
+  "qdrant-client>=1.9.0",
+  "ollama>=0.2.0",
   "mcp>=1.0.0",
+  "pyyaml>=6.0",
   "python-dotenv>=1.0.0",
 ]
-
-[project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.4.0"]
-qdrant = ["qdrant-client>=1.9.0"]
-full = ["qdrant-client>=1.9.0", "ollama>=0.2.0"]
-ollama-embed = ["ollama>=0.2.0"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/llm_harness_lite", "src/harness"]

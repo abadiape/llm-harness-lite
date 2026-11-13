@@ -1,15 +1,20 @@
 """Anthropic backend, translated to/from normalized types."""
 from __future__ import annotations
+
 import time
+
 import anthropic
+
 from llm_harness_lite.llm.types import ChatResponse, Message, ToolCallRequest, ToolSpec, Usage
 from llm_harness_lite.utils.costs import CostManager, estimate_cost
 
+
 class AnthropicBackend:
-    def __init__(self, model: str, cost_manager: CostManager | None = None):
+    def __init__(self, model: str, cost_manager: CostManager | None = None,
+                 api_key: str | None = None):
         self.model = model
         self.cost_manager = cost_manager
-        self.client = anthropic.Anthropic()
+        self.client = anthropic.Anthropic(api_key=api_key)
 
     def chat(self, messages: list[Message], tools: list[ToolSpec] | None = None,
              temperature: float = 0.2) -> ChatResponse:

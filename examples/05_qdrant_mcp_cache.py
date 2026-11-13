@@ -15,7 +15,7 @@ from llm_harness_lite.mcp.client import PersistentMCP
 
 cfg = yaml.safe_load(open("config.yaml"))
 
-# 1) Qdrant store (swap kind to pgvector in config to compare)
+# 1) Qdrant store. Both supported stores work with the same Retriever.
 s = cfg["store"]["qdrant"]
 store = create_store("qdrant", url=s["url"], collection=s["collection"], dim=s["dim"])
 store.init()

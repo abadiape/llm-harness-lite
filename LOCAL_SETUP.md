@@ -1,13 +1,13 @@
 # Local setup (recommended: venv + compose for infra only)
 
-You do NOT need a Dockerfile for daily dev. `docker-compose.yml` already pulls
-prebuilt images (pgvector, qdrant). Your Python code runs on the host in a venv
+You do NOT need a Dockerfile for daily dev. `docker-compose.yml` pulls the
+prebuilt pgvector image by default. Your Python code runs on the host in a venv
 for fast iteration.
 
-## 1) Infra with Docker (one command)
+## 1) Local RAG with pgvector
 ```bash
-docker compose up -d db qdrant
-docker ps   # 5432 = pgvector, 6333 = qdrant
+docker compose up -d db
+docker ps   # 5432 = pgvector
 ```
 
 ## 2) Python in venv (host)
@@ -15,12 +15,20 @@ docker ps   # 5432 = pgvector, 6333 = qdrant
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -U pip
-pip install -e ".[dev]"
-pip install -e ".[full]" 2>/dev/null || pip install qdrant-client ollama
+pip install -e ".[dev,examples,openai,ollama,pgvector]"
 cp .env.example .env
 ```
+
+For a minimal local environment, install only what is needed; for example,
+`pip install -e ".[openai,ollama]"` is enough for Ollama chat and embeddings.
 Set the relevant API key in `.env` when using a hosted provider, such as
 `OPENAI_API_KEY` for OpenAI. Ollama does not require an API key.
+
+Qdrant is the production vector-store option and is also available for local
+testing. Start it only when needed with `docker compose up -d qdrant` and add
+the `qdrant` extra (`pip install -e ".[qdrant]"`). Both stores use the same
+`Retriever`; switch `store.kind` in `config.yaml` between `pgvector` (the local
+default) and `qdrant`.
 
 ## Cost estimates
 

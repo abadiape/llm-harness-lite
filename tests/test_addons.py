@@ -1,11 +1,14 @@
 """Offline contracts for the three add-ons (no servers needed)."""
+import os
+import tempfile
+
+from pgvector import Vector
+
+from llm_harness_lite.llm.types import ChatResponse, Message, Usage
 from llm_harness_lite.rag.store_base import Record, create_store
 from llm_harness_lite.rag.store_pgvector import PgVectorStore
-from llm_harness_lite.utils.cache import ChatCache, CachedLLM
-from llm_harness_lite.llm.types import Message, ChatResponse, Usage
-from llm_harness_lite.tools.registry import ToolRegistry
-from pgvector import Vector
-import tempfile, os
+from llm_harness_lite.utils.cache import CachedLLM, ChatCache
+
 
 class FakeEmbed:
     model = "fake"
@@ -43,7 +46,9 @@ def test_cache_semantic_hit():
 def test_qdrant_interface_shape():
     # import-only check so CI without qdrant still validates the protocol
     import ast
-    src = open("src/harness/rag/store_qdrant.py").read()
+    from pathlib import Path
+
+    src = (Path(__file__).parents[1] / "src/llm_harness_lite/rag/store_qdrant.py").read_text()
     tree = ast.parse(src)
     methods = {n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)}
     assert {"init", "upsert", "search"} <= methods

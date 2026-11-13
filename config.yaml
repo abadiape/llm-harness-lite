@@ -27,6 +27,11 @@ cache:
   path: .harness_cache.db
   semantic_threshold: 0.93
   enabled: true
+costs:
+  cache_path: ~/.cache/llm-harness-lite/openrouter-prices.json
+  cache_ttl_seconds: 3600
+  request_timeout_seconds: 2.0
+  overrides: {}
 agent:
   max_steps: 8
   budget_usd: 0.05

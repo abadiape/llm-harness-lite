@@ -25,4 +25,4 @@ agent = harness.Agent(llm, reg, max_steps=cfg["agent"]["max_steps"],
               budget_usd=cfg["agent"]["budget_usd"])
 res = agent.run("What is 18*23? Then search_docs for 'refunds'. Answer concisely.")
 print(res.answer)
-print(f"[steps {res.steps} | ${res.usage.cost_usd:.5f} | {res.usage.input_tokens+res.usage.output_tokens} tok]")
+print(f"[steps {res.steps} | ${res.usage.cost_usd:.5f} | {res.usage.input_tokens} input tokens | {res.usage.output_tokens} output tokens | {res.usage.latency_s:.2f}s latency]")

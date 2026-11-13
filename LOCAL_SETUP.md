@@ -22,6 +22,36 @@ cp .env.example .env
 Set the relevant API key in `.env` when using a hosted provider, such as
 `OPENAI_API_KEY` for OpenAI. Ollama does not require an API key.
 
+## Cost estimates
+
+`CostManager.initialize()` refreshes OpenRouter's public model catalog when its
+local cache expires (one hour by default). It is explicit, so imports and normal
+chat calls do not make network requests; if refresh fails, cached or built-in
+prices remain available. `examples/04_cost_compare.py` demonstrates setup.
+You can override prices in `config.yaml`:
+
+```yaml
+costs:
+  overrides:
+    company/model-name:
+      input_per_million: 0.25
+      output_per_million: 1.0
+```
+
+Pass the configured manager to `create_llm(..., cost_manager=cost_manager)` to
+use its refreshed prices and overrides:
+
+```python
+cost_manager = CostManager.from_config(config.get("costs"))
+cost_manager.initialize()
+llm = create_llm(provider, model, cost_manager=cost_manager)
+```
+
+Loopback OpenAI-compatible endpoints are treated as free unless an override
+matches their model. An unknown remote model warns and estimates as $0 until
+you add an override. Prices cover input and output tokens; cached tokens,
+images, and provider-specific billing adjustments are not included.
+
 ## 3) Local models (cheapest path)
 ```bash
 ollama pull qwen3:8b

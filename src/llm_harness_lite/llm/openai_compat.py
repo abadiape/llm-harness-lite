@@ -1,15 +1,20 @@
 """One backend for OpenAI + Ollama + vLLM + OpenRouter (all OpenAI-compatible)."""
 from __future__ import annotations
 import json, time
+from urllib.parse import urlsplit
 from openai import OpenAI
 from llm_harness_lite.llm.types import ChatResponse, Message, ToolCallRequest, ToolSpec, Usage
-from llm_harness_lite.utils.costs import estimate_cost
+from llm_harness_lite.utils.costs import CostManager, estimate_cost
 
 class OpenAICompatBackend:
     def __init__(self, model: str, base_url: str | None = None,
-                 api_key: str | None = None):
+                 api_key: str | None = None, cost_manager: CostManager | None = None,
+                 local: bool | None = None):
         import os
         self.model = model
+        self.cost_manager = cost_manager
+        host = urlsplit(base_url or "").hostname
+        self.local = local if local is not None else host in {"localhost", "127.0.0.1", "::1"}
         self.client = OpenAI(base_url=base_url,
                              api_key=api_key or os.getenv("OPENAI_API_KEY", "dummy"))
 
@@ -44,5 +49,6 @@ class OpenAICompatBackend:
             message=Message(role="assistant", content=out.content or "", tool_calls=tcs),
             finish="tool_calls" if tcs else ("stop" if choice.finish_reason == "stop" else "stop"),
             usage=Usage(input_tokens=in_t, output_tokens=out_t,
-                        cost_usd=estimate_cost(self.model, in_t, out_t),
+                        cost_usd=estimate_cost(self.model, in_t, out_t,
+                                               manager=self.cost_manager, local=self.local),
                         model=self.model, latency_s=time.time() - t0))

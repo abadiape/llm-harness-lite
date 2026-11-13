@@ -3,11 +3,12 @@ from __future__ import annotations
 import time
 import anthropic
 from llm_harness_lite.llm.types import ChatResponse, Message, ToolCallRequest, ToolSpec, Usage
-from llm_harness_lite.utils.costs import estimate_cost
+from llm_harness_lite.utils.costs import CostManager, estimate_cost
 
 class AnthropicBackend:
-    def __init__(self, model: str):
+    def __init__(self, model: str, cost_manager: CostManager | None = None):
         self.model = model
+        self.cost_manager = cost_manager
         self.client = anthropic.Anthropic()
 
     def chat(self, messages: list[Message], tools: list[ToolSpec] | None = None,
@@ -51,5 +52,6 @@ class AnthropicBackend:
             usage=Usage(input_tokens=resp.usage.input_tokens,
                         output_tokens=resp.usage.output_tokens,
                         cost_usd=estimate_cost(self.model, resp.usage.input_tokens,
-                                              resp.usage.output_tokens),
+                                              resp.usage.output_tokens,
+                                              manager=self.cost_manager),
                         model=self.model, latency_s=time.time() - t0))

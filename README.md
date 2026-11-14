@@ -45,6 +45,25 @@ existing rows.
 Run `docker compose up -d qdrant` only when testing the Qdrant path. The Qdrant
 client is available through the `qdrant` extra.
 
+## Explicit model routing
+
+`LLMRouter` dispatches through a caller-supplied policy; it does not silently
+infer cost or quality tiers. The policy receives messages, tools, temperature,
+and named candidate routes, then returns one configured route. Keep the policy
+deterministic for equivalent requests when wrapping the router with `CachedLLM`.
+Exact cache keys include model, full messages, tool schemas, and temperature.
+Semantic cache matches are additionally scoped to model, temperature, and
+embedding model, and compare the full message context.
+
+```python
+from llm_harness_lite import LLMRouter
+
+def policy(request):
+    return "tool-capable" if request.tools else "local"
+
+llm = LLMRouter({"local": local_llm, "tool-capable": remote_llm}, policy)
+```
+
 Custom providers can implement the `LLMBackend` protocol and register a factory
 without changing the library:
 

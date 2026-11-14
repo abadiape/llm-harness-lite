@@ -2,6 +2,7 @@
 from llm_harness_lite.agent.loop import Agent, AgentResult, AgentStopReason
 from llm_harness_lite.llm.base import AsyncLLMBackend, LLMBackend
 from llm_harness_lite.llm.factory import create_llm, register_provider
+from llm_harness_lite.llm.router import LLMRouter, RoutingPolicy, RoutingRequest
 from llm_harness_lite.llm.types import ChatResponse, Message, ToolCallRequest, ToolSpec
 from llm_harness_lite.tools.registry import ToolExecutionError, ToolRegistry, tool
 
@@ -12,8 +13,11 @@ __all__ = [
     "AgentStopReason",
     "AsyncLLMBackend",
     "ChatResponse",
-    "Message",
     "LLMBackend",
+    "LLMRouter",
+    "Message",
+    "RoutingPolicy",
+    "RoutingRequest",
     "ToolCallRequest",
     "ToolExecutionError",
     "ToolRegistry",

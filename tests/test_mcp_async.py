@@ -172,7 +172,7 @@ def test_mcp_close_has_timeout_and_marks_client_closed(monkeypatch):
         monkeypatch.setattr(client, "_session_factory", lambda: lambda *_: session)
         await client.connect()
 
-        with pytest.raises(TimeoutError):
+        with pytest.raises(asyncio.TimeoutError):
             await client.close()
         assert session.close_started.is_set()
         assert not client.connected

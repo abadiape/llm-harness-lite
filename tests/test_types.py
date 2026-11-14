@@ -1,5 +1,6 @@
-from llm_harness_lite.llm.types import Message, ToolSpec
+from llm_harness_lite.llm.types import Message
 from llm_harness_lite.tools.registry import ToolRegistry
+
 
 def test_registry_schema():
     r = ToolRegistry()

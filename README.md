@@ -35,6 +35,13 @@ the same `Retriever`. Embedding generation is separate from both storage and
 chat-model choice, so users own their vectors and can change LLM providers
 without binding retrieval to a model vendor.
 
+Call `store.init()` before ingesting. Re-ingesting a source updates its
+source/chunk records instead of creating duplicates; direct store records with
+no ID use a stable content-and-metadata key. Both adapters validate vector
+dimensions and finite numeric values on writes and searches. Initializing an
+existing pgvector table adds the key column and a unique index without removing
+existing rows.
+
 Run `docker compose up -d qdrant` only when testing the Qdrant path. The Qdrant
 client is available through the `qdrant` extra.
 

@@ -1,6 +1,8 @@
 """Embedder protocol + OpenAI + Ollama implementations."""
 from __future__ import annotations
+
 from typing import Protocol
+
 
 class Embedder(Protocol):
     dim: int

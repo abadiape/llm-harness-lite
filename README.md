@@ -85,6 +85,13 @@ from an already-running event loop. Agent results expose a structured
 recoverable failures to return to the model; unexpected tool exceptions propagate
 to the caller.
 
+Pass `observer=callback` to `Agent` for structured `AgentEvent` lifecycle
+metadata, including run IDs, model/tool timings, usage, and stop reason. Events
+omit prompts, tool arguments, and tool results. The synchronous callback runs
+inline and its errors propagate, so keep it fast and handle telemetry failures
+in the callback if they should not abort a run. Provider responses are checked
+for valid token counts, costs, and latency before budget accounting.
+
 Built-in backends provide native `achat()` and `aclose()` methods; configure
 their request deadline with `create_llm(..., timeout=60)`. In async applications,
 use `async with backend` to close provider resources. `MCPClient` follows the
@@ -102,6 +109,10 @@ See `LOCAL_SETUP.md` + `examples/`:
 - `05_qdrant_mcp_cache.py` — Qdrant + persistent MCP + semantic cache
 
 ## Layout (for contributors)
+
+CI runs the test suite and lint on Python 3.10 and 3.15, then separately builds
+and installs the dependency-free wheel. The PyPI release workflow waits for CI.
+
 - `src/llm_harness_lite/llm/` — `types.py`, `base.py` (Protocol), `openai_compat.py`, `anthropic_backend.py`, `factory.py`
 - `src/llm_harness_lite/agent/loop.py` — framework-agnostic ReAct loop
 - `src/llm_harness_lite/tools/registry.py` — `@tool` + JSON Schema from signature

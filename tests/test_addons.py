@@ -82,7 +82,7 @@ def test_pgvector_binds_vector_parameters(monkeypatch):
     monkeypatch.setattr("psycopg.connect", lambda *args, **kwargs: connection)
     monkeypatch.setattr("pgvector.psycopg.register_vector", lambda conn: None)
 
-    store = PgVectorStore("unused")
+    store = PgVectorStore("unused", dim=3)
     store.upsert([Record(id=None, text="chunk", embedding=[0.1, 0.2, 0.3], meta={})])
     store.search([0.1, 0.2, 0.3])
 

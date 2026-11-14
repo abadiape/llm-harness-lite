@@ -1,8 +1,13 @@
 """Tool registry: python function -> ToolSpec (JSON Schema via inspect)."""
 from __future__ import annotations
-import inspect, json
+
+import asyncio
+import inspect
+import json
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
+
 from llm_harness_lite.llm.types import ToolSpec
 
 _PY2JSON = {str: "string", int: "integer", float: "number", bool: "boolean",
@@ -13,7 +18,14 @@ class _Entry:
     fn: Callable
     spec: ToolSpec
 
+
+class ToolExecutionError(Exception):
+    """A recoverable tool failure that an agent may return to the model."""
+
+
 class ToolRegistry:
+    """Register tools; only explicit ToolExecutionError failures are recoverable."""
+
     def __init__(self):
         self._tools: dict[str, _Entry] = {}
 
@@ -36,14 +48,34 @@ class ToolRegistry:
     def specs(self) -> list[ToolSpec]:
         return [e.spec for e in self._tools.values()]
 
+    @staticmethod
+    def _serialize(out: Any) -> str:
+        return out if isinstance(out, str) else json.dumps(out, default=str)
+
     def call(self, name: str, arguments: dict[str, Any]) -> str:
         if name not in self._tools:
             return f"Error: unknown tool '{name}'. Available: {list(self._tools)}"
-        try:
-            out = self._tools[name].fn(**arguments)
-            return out if isinstance(out, str) else json.dumps(out, default=str)
-        except Exception as e:
-            return f"Error executing {name}: {e}"
+        fn = self._tools[name].fn
+        if inspect.iscoroutinefunction(fn):
+            return f"Error executing {name}: asynchronous tools require registry.acall()."
+        out = fn(**arguments)
+        if inspect.isawaitable(out):
+            if inspect.iscoroutine(out):
+                out.close()
+            raise TypeError("tool returned an awaitable; use registry.acall()")
+        return self._serialize(out)
+
+    async def acall(self, name: str, arguments: dict[str, Any]) -> str:
+        if name not in self._tools:
+            return f"Error: unknown tool '{name}'. Available: {list(self._tools)}"
+        fn = self._tools[name].fn
+        if inspect.iscoroutinefunction(fn):
+            out = await fn(**arguments)
+        else:
+            out = await asyncio.to_thread(fn, **arguments)
+            if inspect.isawaitable(out):
+                out = await out
+        return self._serialize(out)
 
 def tool(registry: ToolRegistry, **kw):
     def deco(fn: Callable):

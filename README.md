@@ -52,6 +52,13 @@ import llm_harness_lite as harness
 llm = harness.create_llm("openai_compat", "qwen3:8b", base_url="http://localhost:11434/v1")
 ```
 
+The agent API is async-first: use `await agent.arun(goal)` in async applications.
+`agent.run(goal)` is a synchronous convenience for scripts and must not be called
+from an already-running event loop. Agent results expose a structured
+`stop_reason` and usage totals. Tools can raise `harness.ToolExecutionError` for
+recoverable failures to return to the model; unexpected tool exceptions propagate
+to the caller.
+
 See `LOCAL_SETUP.md` + `examples/`:
 - `01_basic_chat.py` — normalized `chat()` across providers
 - `02_agent_with_tools.py` — agent loop + budget guard

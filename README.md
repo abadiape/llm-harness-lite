@@ -59,6 +59,15 @@ from an already-running event loop. Agent results expose a structured
 recoverable failures to return to the model; unexpected tool exceptions propagate
 to the caller.
 
+Built-in backends provide native `achat()` and `aclose()` methods; configure
+their request deadline with `create_llm(..., timeout=60)`. In async applications,
+use `async with backend` to close provider resources. `MCPClient` follows the
+same async-context-manager pattern, and `await mcp.register_into(registry)`
+preserves remote tool schemas for use by `Agent.arun()`.
+Synchronous custom backends and tools run in worker threads; cancelling their
+await does not forcibly stop the underlying synchronous function. Implement
+`achat()` or an async tool for cancellable I/O.
+
 See `LOCAL_SETUP.md` + `examples/`:
 - `01_basic_chat.py` — normalized `chat()` across providers
 - `02_agent_with_tools.py` — agent loop + budget guard

@@ -1,5 +1,6 @@
 """LLM Harness Lite — lightweight universal agent + RAG + MCP for any model."""
 from llm_harness_lite.agent.loop import Agent, AgentResult, AgentStopReason
+from llm_harness_lite.llm.base import AsyncLLMBackend, LLMBackend
 from llm_harness_lite.llm.factory import create_llm, register_provider
 from llm_harness_lite.llm.types import ChatResponse, Message, ToolCallRequest, ToolSpec
 from llm_harness_lite.tools.registry import ToolExecutionError, ToolRegistry, tool
@@ -9,8 +10,10 @@ __all__ = [
     "Agent",
     "AgentResult",
     "AgentStopReason",
+    "AsyncLLMBackend",
     "ChatResponse",
     "Message",
+    "LLMBackend",
     "ToolCallRequest",
     "ToolExecutionError",
     "ToolRegistry",

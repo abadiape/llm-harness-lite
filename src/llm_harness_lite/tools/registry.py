@@ -45,6 +45,13 @@ class ToolRegistry:
         self._tools[spec.name] = _Entry(fn, spec)
         return spec
 
+    def register_spec(self, fn: Callable, spec: ToolSpec) -> ToolSpec:
+        """Register a callable with an existing schema, e.g. a remote tool schema."""
+        if spec.name in self._tools:
+            raise ValueError(f"Tool {spec.name!r} is already registered")
+        self._tools[spec.name] = _Entry(fn, spec)
+        return spec
+
     def specs(self) -> list[ToolSpec]:
         return [e.spec for e in self._tools.values()]
 

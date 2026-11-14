@@ -10,6 +10,11 @@ docker compose up -d db
 docker ps   # 5432 = pgvector
 ```
 
+The Compose database ports bind to `127.0.0.1` for local development. The
+included Qdrant service has no authentication configured; do not expose either
+service to a network without adding appropriate authentication and network
+controls.
+
 ## 2) Python in venv (host)
 ```bash
 python3 -m venv .venv

@@ -11,7 +11,10 @@ catalog_refreshed = cost_manager.initialize()
 print(f"Pricing catalog: {'refreshed' if catalog_refreshed else 'cached/fallback'}")
 
 MODELS = [
-    ("openai_compat", "qwen3:8b", {"base_url": "http://localhost:11434/v1"}),
+    ("openai_compat", "qwen3:8b", {
+        "base_url": "http://localhost:11434/v1",
+        "timeout": 300.0,
+    }),
     ("openai", "gpt-4o-mini", {}),
     # ("anthropic", "claude-3-5-haiku-latest", {}),
 ]

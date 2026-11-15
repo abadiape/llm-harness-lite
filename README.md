@@ -108,6 +108,15 @@ See `LOCAL_SETUP.md` + `examples/`:
 - `04_cost_compare.py` — bang-for-buck across models
 - `05_qdrant_mcp_cache.py` — Qdrant + persistent MCP + semantic cache
 
+## User guide
+
+- [Build a purpose-specific agent](docs/guide.md) — start with one tool and
+  grow the same agent in small steps
+- [Choose an LLM and configure your app](docs/configuration.md) — providers,
+  credentials, and optional YAML configuration
+- [RAG and MCP integrations](docs/integrations.md) — add retrieval, remote
+  tools, caching, and other optional capabilities
+
 ## Layout (for contributors)
 
 CI runs the test suite and lint on Python 3.10 and 3.15, then separately builds

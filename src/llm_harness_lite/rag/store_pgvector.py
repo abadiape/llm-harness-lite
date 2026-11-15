@@ -6,7 +6,7 @@ import json
 import re
 from typing import Any
 
-from llm_harness_lite.rag.store_base import (
+from .store_base import (
     Record,
     VectorStore,  # noqa: F401
     validate_dimension,

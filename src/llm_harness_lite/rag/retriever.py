@@ -5,8 +5,8 @@ import hashlib
 import json
 from typing import Any
 
-from llm_harness_lite.rag.chunker import chunk_text
-from llm_harness_lite.rag.store_base import (
+from .chunker import chunk_text
+from .store_base import (
     Record,
     validate_dimension,
     validate_embedding,

@@ -7,8 +7,8 @@ import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
-from llm_harness_lite.llm.base import LLMBackend
-from llm_harness_lite.llm.types import ChatResponse, Message, ToolSpec
+from .base import LLMBackend
+from .types import ChatResponse, Message, ToolSpec
 
 
 @dataclass(frozen=True)

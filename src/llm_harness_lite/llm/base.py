@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from llm_harness_lite.llm.types import ChatResponse, Message, ToolSpec
+from .types import ChatResponse, Message, ToolSpec
 
 
 class LLMBackend(Protocol):

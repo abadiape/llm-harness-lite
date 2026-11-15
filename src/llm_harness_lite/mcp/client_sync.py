@@ -6,7 +6,8 @@ import threading
 from typing import Any
 
 from llm_harness_lite.llm.types import ToolSpec
-from llm_harness_lite.mcp.client_async import MCPClient
+
+from .client_async import MCPClient
 
 
 def _run_blocking(coro, loop: asyncio.AbstractEventLoop, timeout: float):
@@ -26,7 +27,6 @@ def _run_blocking(coro, loop: asyncio.AbstractEventLoop, timeout: float):
     except TimeoutError:
         future.cancel()
         raise
-
 
 class PersistentMCP:
     """Keep one async MCP session open for synchronous callers."""
@@ -138,7 +138,6 @@ class PersistentMCP:
             registry.register_spec(make_call(remote_spec.name), spec)
             registered.append(local_name)
         return registered
-
 
 async def load_mcp_tools_stdio(
     registry,

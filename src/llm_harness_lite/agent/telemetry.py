@@ -6,8 +6,9 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from llm_harness_lite.agent.types import AgentResult, AgentStopReason
 from llm_harness_lite.llm.types import Message, Usage
+
+from .types import AgentResult, AgentStopReason
 
 
 @dataclass(frozen=True)

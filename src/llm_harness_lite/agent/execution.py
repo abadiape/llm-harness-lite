@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 
-from llm_harness_lite.agent.telemetry import AgentObserver, emit_event
+from .telemetry import AgentObserver, emit_event
 from llm_harness_lite.llm.types import Message, ToolSpec
 from llm_harness_lite.tools.registry import ToolExecutionError
 

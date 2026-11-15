@@ -6,7 +6,7 @@ import time
 
 import anthropic
 
-from llm_harness_lite.llm.types import (
+from .types import (
     ChatResponse,
     Message,
     ToolCallRequest,

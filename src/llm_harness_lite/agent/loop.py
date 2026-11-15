@@ -5,13 +5,12 @@ import asyncio
 import time
 import uuid
 
-from llm_harness_lite.agent.execution import call_tool, chat_backend
-from llm_harness_lite.agent.prompts import SYSTEM
-from llm_harness_lite.agent.telemetry import AgentObserver, completed_result, emit_event
-from llm_harness_lite.agent.types import AgentResult, AgentStopReason
-from llm_harness_lite.agent.validation import validate_agent_config, validate_response
+from .execution import call_tool, chat_backend
+from .prompts import SYSTEM
+from .telemetry import AgentObserver, completed_result, emit_event
+from .types import AgentResult, AgentStopReason
+from .validation import validate_agent_config, validate_response
 from llm_harness_lite.llm.types import Message, Usage
-
 
 class Agent:
     """Run a bounded tool-using loop; await ``arun`` in async applications."""

@@ -4,14 +4,13 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from llm_harness_lite.rag.store_base import (
+from .store_base import (
     Record,
     validate_dimension,
     validate_embedding,
     validate_record,
     validate_top_k,
 )
-
 
 class QdrantStore:
     def __init__(

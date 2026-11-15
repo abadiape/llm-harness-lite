@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from collections.abc import Callable
 
-from llm_harness_lite.llm.base import LLMBackend
+from .base import LLMBackend
 
 _BUILTIN_PROVIDERS = {
     "anthropic", "openai", "openai_compat", "openrouter",
@@ -30,18 +30,18 @@ def create_llm(provider: str, model: str, **kw) -> LLMBackend:
     provider = provider.strip().casefold()
     cost_manager = kw.get("cost_manager")
     if provider == "anthropic":
-        from llm_harness_lite.llm.anthropic_backend import AnthropicBackend
+        from .anthropic_backend import AnthropicBackend
         return AnthropicBackend(model, api_key=kw.get("api_key"),
                                 cost_manager=cost_manager,
                                 timeout=kw.get("timeout", 60.0))
     if provider == "openai":
-        from llm_harness_lite.llm.openai_compat import OpenAICompatBackend
+        from .openai_compat import OpenAICompatBackend
         return OpenAICompatBackend(model, base_url=kw.get("base_url"),
                                    api_key=kw.get("api_key", os.getenv("OPENAI_API_KEY")),
                                    cost_manager=cost_manager,
                                    timeout=kw.get("timeout", 60.0))
     if provider == "openrouter":
-        from llm_harness_lite.llm.openai_compat import OpenAICompatBackend
+        from .openai_compat import OpenAICompatBackend
         return OpenAICompatBackend(
             model, base_url=kw.get("base_url", "https://openrouter.ai/api/v1"),
             api_key=kw.get("api_key", os.getenv("OPENROUTER_API_KEY")),
@@ -49,7 +49,7 @@ def create_llm(provider: str, model: str, **kw) -> LLMBackend:
             timeout=kw.get("timeout", 60.0),
         )
     if provider in {"openai_compat", "ollama", "vllm", "lmstudio"}:
-        from llm_harness_lite.llm.openai_compat import OpenAICompatBackend
+        from .openai_compat import OpenAICompatBackend
         return OpenAICompatBackend(model, base_url=kw.get("base_url"),
                                    api_key=kw.get("api_key", "dummy"),
                                    cost_manager=cost_manager,

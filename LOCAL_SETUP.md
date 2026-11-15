@@ -81,6 +81,6 @@ python examples/05_qdrant_mcp_cache.py
 ## When to use the Dockerfile?
 Only for prod deploy or sharing an exact env:
 ```bash
-docker build -t universal-harness .
-docker run --network host --env-file .env universal-harness
+docker build -t llm-harness-lite .
+docker run --network host --env-file .env llm-harness-lite
 ```

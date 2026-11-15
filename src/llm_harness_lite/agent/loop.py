@@ -7,7 +7,7 @@ import uuid
 
 from llm_harness_lite.llm.types import Message, Usage
 
-from .execution import call_tool, chat_backend
+from .execution import AgentBackend, AgentToolExecutor, call_tool, chat_backend
 from .prompts import SYSTEM
 from .telemetry import AgentObserver, completed_result, emit_event
 from .types import AgentResult, AgentStopReason
@@ -19,8 +19,8 @@ class Agent:
 
     def __init__(
         self,
-        llm,
-        registry,
+        llm: AgentBackend,
+        registry: AgentToolExecutor,
         max_steps: int = 8,
         budget_usd: float = 0.05,
         system: str = SYSTEM,

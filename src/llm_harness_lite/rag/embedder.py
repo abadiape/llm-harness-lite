@@ -5,8 +5,6 @@ from typing import Protocol
 
 
 class Embedder(Protocol):
-    dim: int
-    model: str
     def embed(self, texts: list[str]) -> list[list[float]]: ...
 
 class OpenAIEmbedder:

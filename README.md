@@ -68,22 +68,27 @@ Custom providers can implement the `LLMBackend` protocol and register a factory
 without changing the library:
 
 ```python
-harness.register_provider("my-runtime", MyBackend)
-llm = harness.create_llm("my-runtime", "model-name", endpoint="http://localhost")
+import llm_harness_lite
+
+llm_harness_lite.register_provider("my-runtime", MyBackend)
+llm = llm_harness_lite.create_llm("my-runtime", "model-name", endpoint="http://localhost")
 ```
 
-## Use (short alias supported)
+## Use
 ```python
-import llm_harness_lite as harness
-llm = harness.create_llm("openai_compat", "qwen3:8b", base_url="http://localhost:11434/v1")
+import llm_harness_lite
+
+llm = llm_harness_lite.create_llm(
+    "openai_compat", "qwen3:8b", base_url="http://localhost:11434/v1"
+)
 ```
 
 The agent API is async-first: use `await agent.arun(goal)` in async applications.
 `agent.run(goal)` is a synchronous convenience for scripts and must not be called
 from an already-running event loop. Agent results expose a structured
-`stop_reason` and usage totals. Tools can raise `harness.ToolExecutionError` for
-recoverable failures to return to the model; unexpected tool exceptions propagate
-to the caller.
+`stop_reason` and usage totals. Tools can raise
+`llm_harness_lite.ToolExecutionError` for recoverable failures to return to the
+model; unexpected tool exceptions propagate to the caller.
 
 Pass `observer=callback` to `Agent` for structured `AgentEvent` lifecycle
 metadata, including run IDs, model/tool timings, usage, and stop reason. Events
@@ -128,4 +133,3 @@ and installs the dependency-free wheel. The PyPI release workflow waits for CI.
 - `src/llm_harness_lite/rag/` — `chunker.py`, `embedder.py`, `store_base.py`, `store_pgvector.py`, `store_qdrant.py`, `retriever.py`
 - `src/llm_harness_lite/mcp/client.py` — `MCPClient` + `PersistentMCP` background-loop bridge
 - `src/llm_harness_lite/utils/` — `costs.py`, `cache.py` (exact + semantic)
-- `src/harness/` — back-compat shim (`import harness` still works)

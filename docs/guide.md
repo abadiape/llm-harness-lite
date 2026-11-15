@@ -24,19 +24,19 @@ instructions that describe the agent's job. This example uses a small
 in-memory order lookup so it can run without a database or external service:
 
 ```python
-import llm_harness_lite as harness
+import llm_harness_lite
 
-llm = harness.create_llm("openai", "gpt-4o-mini")
-tools = harness.ToolRegistry()
+llm = llm_harness_lite.create_llm("openai", "gpt-4o-mini")
+tools = llm_harness_lite.ToolRegistry()
 
 orders = {"A-100": "shipped"}
 
-@harness.tool(tools)
+@llm_harness_lite.tool(tools)
 def lookup_order(order_id: str) -> str:
     """Look up the status of an order by its ID."""
     return orders.get(order_id, "No matching order found.")
 
-agent = harness.Agent(
+agent = llm_harness_lite.Agent(
     llm,
     tools,
     system="You are a support assistant. Use lookup_order for order-status questions. Do not guess.",
@@ -52,7 +52,7 @@ finally:
     llm.close()
 ```
 
-`@harness.tool(tools)` registers the function and derives a tool schema from its
+`@llm_harness_lite.tool(tools)` registers the function and derives a tool schema from its
 name, docstring, and annotated parameters. When the model requests that tool,
 the harness calls the Python function and sends its result back to the model.
 Replace the example dictionary with an application function that accesses only
@@ -70,10 +70,10 @@ The tools and agent setup stay the same when you switch providers. Change the
 
 ```python
 # Anthropic: pip install "llm-harness-lite[anthropic]"
-llm = harness.create_llm("anthropic", "your-model-name")
+llm = llm_harness_lite.create_llm("anthropic", "your-model-name")
 
 # Ollama's OpenAI-compatible endpoint: pip install "llm-harness-lite[openai]"
-llm = harness.create_llm(
+llm = llm_harness_lite.create_llm(
     "openai_compat",
     "qwen3:8b",
     base_url="http://localhost:11434/v1",

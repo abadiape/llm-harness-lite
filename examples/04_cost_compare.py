@@ -1,7 +1,7 @@
 """Bang-for-buck: same prompt across backends, print tokens/$/latency."""
 import yaml
 from dotenv import load_dotenv
-import llm_harness_lite as harness
+import llm_harness_lite
 from llm_harness_lite.utils.costs import CostManager
 
 load_dotenv()
@@ -21,8 +21,8 @@ MODELS = [
 prompt = "Explain pgvector vs Qdrant in 3 bullets for a Python dev."
 for provider, model, kw in MODELS:
     try:
-        llm = harness.create_llm(provider, model, cost_manager=cost_manager, **kw)
-        r = llm.chat([harness.Message(role="user", content=prompt)])
+        llm = llm_harness_lite.create_llm(provider, model, cost_manager=cost_manager, **kw)
+        r = llm.chat([llm_harness_lite.Message(role="user", content=prompt)])
         print(f"\n== {model} ==\n{r.message.content[:400]}")
         print(
             f"tok {r.usage.input_tokens}/{r.usage.output_tokens} | "

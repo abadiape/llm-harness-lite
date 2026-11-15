@@ -32,9 +32,10 @@ llm = llm_harness_lite.create_llm(
 )
 ```
 
-Install Ollama and pull the model separately. For hosted providers, keep API
-keys outside the YAML file and source them from environment variables or a
-secret manager.
+Install Ollama and pull the model separately; see
+[Local setup](../LOCAL_SETUP.md) for download, startup, and model commands.
+For hosted providers, keep API keys outside the YAML file and source them from
+environment variables or a secret manager.
 
 ## Optional YAML configuration
 

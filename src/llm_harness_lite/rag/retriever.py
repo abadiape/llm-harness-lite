@@ -6,8 +6,10 @@ import json
 from typing import Any
 
 from .chunker import chunk_text
+from .embedder import Embedder
 from .store_base import (
     Record,
+    VectorStore,
     validate_dimension,
     validate_embedding,
     validate_top_k,
@@ -15,7 +17,13 @@ from .store_base import (
 
 
 class Retriever:
-    def __init__(self, embedder, store, chunk_size: int = 600, chunk_overlap: int = 80):
+    def __init__(
+        self,
+        embedder: Embedder,
+        store: VectorStore,
+        chunk_size: int = 600,
+        chunk_overlap: int = 80,
+    ):
         self.embedder, self.store = embedder, store
         self.chunk_size, self.chunk_overlap = chunk_size, chunk_overlap
         store_dim = getattr(store, "dim", None)

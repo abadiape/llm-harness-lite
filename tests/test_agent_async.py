@@ -53,3 +53,27 @@ def test_run_rejects_nested_event_loop_use():
             agent.run("goal")
 
     asyncio.run(call_run())
+
+
+def test_agent_rejects_backend_without_chat_method():
+    with pytest.raises(TypeError, match="chat\\(\\) or achat\\(\\)"):
+        asyncio.run(Agent(object(), ToolRegistry()).arun("Respond."))
+
+
+def test_agent_rejects_tool_executor_without_call_method():
+    class SpecOnlyRegistry:
+        def specs(self):
+            return []
+
+    llm = FakeLLM([
+        response(
+            Message(
+                role="assistant",
+                tool_calls=[ToolCallRequest("call-1", "lookup", {})],
+            ),
+            finish="tool_calls",
+        ),
+    ])
+
+    with pytest.raises(TypeError, match="call\\(\\) or acall\\(\\)"):
+        asyncio.run(Agent(llm, SpecOnlyRegistry()).arun("Run the tool."))

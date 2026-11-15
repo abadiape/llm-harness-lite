@@ -12,6 +12,7 @@ from .store_base import (
     validate_top_k,
 )
 
+
 class QdrantStore:
     def __init__(
         self,

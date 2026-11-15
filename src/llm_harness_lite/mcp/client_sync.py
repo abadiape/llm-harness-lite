@@ -6,7 +6,9 @@ import threading
 from typing import Any
 
 from llm_harness_lite.llm.types import ToolSpec
+
 from .client_async import MCPClient
+
 
 def _run_blocking(coro, loop: asyncio.AbstractEventLoop, timeout: float):
     if not loop.is_running() or loop.is_closed():

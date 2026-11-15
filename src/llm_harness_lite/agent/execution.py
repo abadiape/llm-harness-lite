@@ -4,9 +4,10 @@ from __future__ import annotations
 import asyncio
 import inspect
 
-from .telemetry import AgentObserver, emit_event
 from llm_harness_lite.llm.types import Message, ToolSpec
 from llm_harness_lite.tools.registry import ToolExecutionError
+
+from .telemetry import AgentObserver, emit_event
 
 
 async def chat_backend(llm, messages: list[Message], tools: list[ToolSpec], temperature: float):

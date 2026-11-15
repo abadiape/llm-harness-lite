@@ -6,8 +6,10 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from .types import AgentResult, AgentStopReason
 from llm_harness_lite.llm.types import Message, Usage
+
+from .types import AgentResult, AgentStopReason
+
 
 @dataclass(frozen=True)
 class AgentEvent:

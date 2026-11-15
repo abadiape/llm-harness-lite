@@ -15,6 +15,7 @@ from .store_base import (
     validate_top_k,
 )
 
+
 class PgVectorStore:
     """Requires the PostgreSQL vector extension; init creates its table and indexes."""
 

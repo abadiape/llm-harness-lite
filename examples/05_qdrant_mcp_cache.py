@@ -6,7 +6,7 @@ import yaml
 from dotenv import load_dotenv
 load_dotenv()
 
-import llm_harness_lite as harness
+import llm_harness_lite
 from llm_harness_lite.rag.embedder import OllamaEmbedder
 from llm_harness_lite.rag.store_base import create_store
 from llm_harness_lite.rag.retriever import Retriever
@@ -25,18 +25,18 @@ ret.ingest("Qdrant is a Rust vector DB with hybrid dense+sparse search.", source
 print("Qdrant search:", ret.context_block("What is Qdrant?", top_k=2)[:200])
 
 # 2) Cached LLM (exact + semantic)
-base = harness.create_llm(cfg["llm"]["provider"], cfg["llm"]["model"], base_url=cfg["llm"].get("base_url"))
+base = llm_harness_lite.create_llm(cfg["llm"]["provider"], cfg["llm"]["model"], base_url=cfg["llm"].get("base_url"))
 llm = CachedLLM(base, ChatCache(cfg["cache"]["path"]), embedder=emb,
                 semantic_threshold=cfg["cache"]["semantic_threshold"])
 for i in range(2):  # second call should hit cache
-    r = llm.chat([harness.Message(role="user", content="What is Qdrant in one line?")])
+    r = llm.chat([llm_harness_lite.Message(role="user", content="What is Qdrant in one line?")])
     print(f"call{i}: {r.message.content[:120]} | model={r.usage.model}")
 print("cache stats:", llm.stats())
 
 # 3) Persistent MCP (needs an MCP server; skipped if none configured)
 servers = cfg.get("mcp", {}).get("servers", [])
 if servers:
-    reg = harness.ToolRegistry()
+    reg = llm_harness_lite.ToolRegistry()
     m = PersistentMCP(command=servers[0]["command"], args=servers[0].get("args", [])).start()
     print("MCP tools:", m.register_into(reg))
     m.stop()

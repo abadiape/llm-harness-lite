@@ -2,7 +2,7 @@
 import yaml
 from dotenv import load_dotenv
 load_dotenv()
-import llm_harness_lite as harness
+import llm_harness_lite
 from llm_harness_lite.rag.embedder import OllamaEmbedder, OpenAIEmbedder
 from llm_harness_lite.rag.store_base import create_store
 from llm_harness_lite.rag.retriever import Retriever
@@ -20,8 +20,8 @@ text = open("README.md").read()
 print(f"ingested {ret.ingest(text, source='README.md')} chunks")
 q = "What does this harness do?"
 ctx = ret.context_block(q, top_k=cfg["rag"]["top_k_final"])
-llm = harness.create_llm(cfg["llm"]["provider"], cfg["llm"]["model"],
+llm = llm_harness_lite.create_llm(cfg["llm"]["provider"], cfg["llm"]["model"],
                  base_url=cfg["llm"].get("base_url"))
-resp = llm.chat([harness.Message(role="system", content="Answer ONLY from CONTEXT. Cite [1][2]."),
-                 harness.Message(role="user", content=f"CONTEXT:\n{ctx}\n\nQ: {q}")])
+resp = llm.chat([llm_harness_lite.Message(role="system", content="Answer ONLY from CONTEXT. Cite [1][2]."),
+                 llm_harness_lite.Message(role="user", content=f"CONTEXT:\n{ctx}\n\nQ: {q}")])
 print(resp.message.content)

@@ -50,11 +50,11 @@ Register a retrieval function in the same tool registry from the first-agent
 guide. The standalone snippet below creates that registry explicitly:
 
 ```python
-import llm_harness_lite as harness
+import llm_harness_lite
 
-tools = harness.ToolRegistry()
+tools = llm_harness_lite.ToolRegistry()
 
-@harness.tool(tools)
+@llm_harness_lite.tool(tools)
 def search_handbook(query: str) -> str:
     """Find relevant passages in the support handbook."""
     return retriever.context_block(query, top_k=4)
@@ -75,12 +75,12 @@ same registry as local Python tools:
 ```python
 import asyncio
 
-import llm_harness_lite as harness
+import llm_harness_lite
 from llm_harness_lite.mcp.client import MCPClient
 
 async def main():
-    llm = harness.create_llm("openai", "gpt-4o-mini")
-    tools = harness.ToolRegistry()
+    llm = llm_harness_lite.create_llm("openai", "gpt-4o-mini")
+    tools = llm_harness_lite.ToolRegistry()
     # Register any local or RAG tools in this registry before connecting MCP.
 
     try:
@@ -89,7 +89,7 @@ async def main():
             args=["--server-option"],
         ) as mcp:
             await mcp.register_into(tools)
-            agent = harness.Agent(
+            agent = llm_harness_lite.Agent(
                 llm,
                 tools,
                 system="Use the available tools to complete the user's request.",

@@ -22,7 +22,9 @@ provider-specific options such as `base_url`, `api_key`, `timeout`, and
 For example, to use Ollama's OpenAI-compatible endpoint:
 
 ```python
-llm = harness.create_llm(
+import llm_harness_lite
+
+llm = llm_harness_lite.create_llm(
     "openai_compat",
     "qwen3:8b",
     base_url="http://localhost:11434/v1",
@@ -59,18 +61,18 @@ harness:
 from pathlib import Path
 
 import yaml
-import llm_harness_lite as harness
+import llm_harness_lite
 
 cfg = yaml.safe_load(Path("config.yaml").read_text(encoding="utf-8"))
 llm_cfg = cfg["llm"]
 agent_cfg = cfg["agent"]
 
-llm = harness.create_llm(
+llm = llm_harness_lite.create_llm(
     llm_cfg["provider"],
     llm_cfg["model"],
     timeout=llm_cfg.get("timeout", 60),
 )
-agent = harness.Agent(
+agent = llm_harness_lite.Agent(
     llm,
     tools,
     max_steps=agent_cfg.get("max_steps", 8),

@@ -26,14 +26,34 @@ database clients, and the MCP SDK are optional; install only the extras your
 application uses. OpenAI-compatible providers (including Ollama and vLLM) use
 the `openai` extra.
 
+## Local development and production scope
+
+The package requires Python 3.10 or newer. For local development, use a virtual
+environment and the optional extras for the providers and integrations you
+choose. [Local setup](LOCAL_SETUP.md) uses Compose services bound to loopback;
+their sample credentials and unauthenticated Qdrant service are for local
+testing only.
+
+This project is a library, not a production API service or deployment stack.
+It does not provide application authentication, network/TLS configuration,
+high availability, backups, or centralized monitoring. A production
+application must supply those and deploy its database/vector store with
+appropriate access controls. The Qdrant adapter can target such a deployment;
+the bundled Compose service is not one.
+
+There is no universal CPU or memory minimum: hosted models require network
+access and provider credentials, while local Ollama requirements depend on the
+chosen model and context size. Size production resources for the model,
+workload, and expected concurrency.
+
 ## RAG portability
 
 The initial supported vector stores are intentionally limited to **pgvector**
-and **Qdrant**. The default local setup uses pgvector; Qdrant is the production
-deployment option. Both implement the same `VectorStore` contract and plug into
-the same `Retriever`. Embedding generation is separate from both storage and
-chat-model choice, so users own their vectors and can change LLM providers
-without binding retrieval to a model vendor.
+and **Qdrant**. The default local setup uses pgvector; the Qdrant adapter can
+connect to a secured production deployment. Both implement the same
+`VectorStore` contract and plug into the same `Retriever`. Embedding generation
+is separate from both storage and chat-model choice, so users own their vectors
+and can change LLM providers without binding retrieval to a model vendor.
 
 Call `store.init()` before ingesting. Re-ingesting a source updates its
 source/chunk records instead of creating duplicates; direct store records with

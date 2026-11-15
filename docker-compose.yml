@@ -1,3 +1,5 @@
+# Local-development services only. PostgreSQL uses sample credentials and
+# Qdrant has no authentication configured.
 services:
   db:
     image: pgvector/pgvector:pg16

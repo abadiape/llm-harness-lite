@@ -2,7 +2,8 @@
 
 You do NOT need a Dockerfile for daily dev. `docker-compose.yml` pulls the
 prebuilt pgvector image by default. Your Python code runs on the host in a venv
-for fast iteration.
+for fast iteration. This guide is for local development, not production
+deployment.
 
 ## 1) Local RAG with pgvector
 ```bash
@@ -10,10 +11,9 @@ docker compose up -d db
 docker ps   # 5432 = pgvector
 ```
 
-The Compose database ports bind to `127.0.0.1` for local development. The
-included Qdrant service has no authentication configured; do not expose either
-service to a network without adding appropriate authentication and network
-controls.
+The Compose database ports bind to `127.0.0.1`. These services are local-only:
+PostgreSQL uses sample credentials and Qdrant has no authentication configured.
+Do not expose them to a network or use this Compose setup in production.
 
 ## 2) Python in venv (host)
 ```bash
@@ -29,11 +29,12 @@ For a minimal local environment, install only what is needed; for example,
 Set the relevant API key in `.env` when using a hosted provider, such as
 `OPENAI_API_KEY` for OpenAI. Ollama does not require an API key.
 
-Qdrant is the production vector-store option and is also available for local
-testing. Start it only when needed with `docker compose up -d qdrant` and add
-the `qdrant` extra (`pip install -e ".[qdrant]"`). Both stores use the same
-`Retriever`; switch `store.kind` in `config.yaml` between `pgvector` (the local
-default) and `qdrant`.
+The Qdrant adapter can connect to a secured production Qdrant deployment. For
+local testing, start the unauthenticated Compose service only when needed with
+`docker compose up -d qdrant` and add the `qdrant` extra
+(`pip install -e ".[qdrant]"`). Both stores use the same `Retriever`; switch
+`store.kind` in `config.yaml` between `pgvector` (the local default) and
+`qdrant`.
 
 ## Cost estimates
 
@@ -65,11 +66,31 @@ matches their model. An unknown remote model warns and estimates as $0 until
 you add an override. Prices cover input and output tokens; cached tokens,
 images, and provider-specific billing adjustments are not included.
 
-## 3) Local models (cheapest path)
+## 3) Local models with Ollama
+
+Install Ollama for your operating system from the
+[official download page](https://ollama.com/download), then launch the app. If
+the server is not already running, start it in a separate terminal and leave
+that terminal open:
+
+```bash
+ollama serve
+```
+
+In another terminal, download the models used by the sample configuration:
+
 ```bash
 ollama pull qwen3:8b
 ollama pull nomic-embed-text
+ollama list
 ```
+
+The sample config uses Ollama's OpenAI-compatible endpoint at
+`http://localhost:11434/v1` for chat and its native endpoint at
+`http://localhost:11434` for embeddings. Local Ollama needs no API key; the
+sample's `dummy` key is only a placeholder for the OpenAI-compatible client.
+See [Choosing an LLM and configuring your app](docs/configuration.md) for the
+provider settings.
 
 ## 4) Run
 ```bash
@@ -78,9 +99,23 @@ python examples/03_rag_ingest_search.py
 python examples/05_qdrant_mcp_cache.py
 ```
 
-## When to use the Dockerfile?
-Only for prod deploy or sharing an exact env:
+The fifth example requires the Qdrant extra and service:
+`pip install -e ".[qdrant]"` and `docker compose up -d qdrant`. Install the MCP
+extra only if you add an MCP server to `config.yaml`.
+
+## Container example
+
+The Dockerfile builds a sample runner, not a production-hardened service. It
+does not run Ollama or a database, and it has no API server, health checks, or
+deployment configuration. The command below uses Linux host networking so the
+sample can reach Ollama at the configured localhost URL:
+
 ```bash
 docker build -t llm-harness-lite .
-docker run --network host --env-file .env llm-harness-lite
+docker run --rm --network host --env-file .env llm-harness-lite
 ```
+
+For production, deploy your application with secured provider and data-service
+configuration, secrets management, monitoring, backups, and capacity settings
+appropriate to your workload. The project does not prescribe a production
+platform or fixed CPU/memory requirements.

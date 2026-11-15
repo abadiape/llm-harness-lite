@@ -103,6 +103,35 @@ When your application owns the backend lifecycle, close it with
 `await llm.aclose()` after use. See [RAG and MCP integrations](integrations.md)
 for an async example that also manages an MCP connection.
 
+## Optional: Add a sub-agent for a distinct job
+
+Most applications can grow one agent by adding focused tools. If a specialist
+needs its own prompt and, optionally, a restricted tool set, create another
+`Agent` and expose it through an async tool on the parent. Using `llm`, `tools`,
+and `agent` from step 2, register this before calling `agent.run()`:
+
+```python
+specialist_tools = llm_harness_lite.ToolRegistry()
+# Register tools that should be available only to the specialist.
+specialist = llm_harness_lite.Agent(
+    llm,
+    specialist_tools,
+    system="Handle account-access questions only.",
+    max_steps=3,
+    budget_usd=0.01,
+)
+
+@llm_harness_lite.tool(tools)
+async def ask_account_specialist(question: str) -> str:
+    result = await specialist.arun(question)
+    return result.answer
+```
+
+This is ordinary tool composition, not built-in delegation. The child has its
+own step and budget limits, and its usage is not included in the parent's
+`AgentResult`; enforce or aggregate a total budget yourself. Use a child only
+when the separation justifies the extra latency and cost.
+
 ## Next steps
 
 - Add retrieval or remote MCP tools in [RAG and MCP integrations](integrations.md).

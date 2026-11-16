@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "llm-harness-lite"
-version = "0.1.0a1"
+version = "0.1.0a2"
 license = { text = "MIT" }
 description = "LLM Harness Lite — lightweight universal agent + RAG + MCP for any LLM (local-first, cost-aware)"
 readme = "README.md"

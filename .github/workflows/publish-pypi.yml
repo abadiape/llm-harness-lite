@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # required for OIDC
 
 jobs:
   checks:
@@ -19,6 +18,10 @@ jobs:
   build-and-publish:
     needs: checks
     runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write  # required for OIDC
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -57,21 +57,43 @@ class FakeSession:
 def test_mcp_connect_close_and_close_idempotently(monkeypatch):
     async def scenario():
         client = MCPClient(command="fake-server", timeout=1)
-        session = FakeSession()
+
+        class TaskBoundContext:
+            def __init__(self):
+                self.entered_task = None
+
+            async def __aenter__(self):
+                self.entered_task = asyncio.current_task()
+                return self
+
+            async def __aexit__(self, *exc):
+                assert self.entered_task is asyncio.current_task()
+
+        transport_context = TaskBoundContext()
+        session_context = TaskBoundContext()
+        session_context.initialized = False
 
         async def enter_transport(stack):
+            await stack.enter_async_context(transport_context)
             return "read", "write"
 
+        def create_session(*_):
+            return session_context
+
+        async def initialize():
+            session_context.initialized = True
+
+        session_context.initialize = initialize
         monkeypatch.setattr(client, "_enter_transport", enter_transport)
-        monkeypatch.setattr(client, "_session_factory", lambda: lambda *_: session)
+        monkeypatch.setattr(client, "_session_factory", lambda: create_session)
         await client.connect()
 
-        assert session.initialized
+        assert session_context.initialized
         assert client.connected
-        assert client._session is session
+        assert client._session is session_context
         await client.close()
         await client.close()
-        assert session.closed
+        assert transport_context.entered_task is session_context.entered_task
         assert not client.connected
         assert client._session is None
     asyncio.run(scenario())
@@ -82,17 +104,30 @@ def test_persistent_mcp_bridge_closes_its_loop(monkeypatch):
         calls = []
 
         async def connect():
-            calls.append("connect")
+            calls.append(("connect", asyncio.current_task()))
 
         async def close():
-            calls.append("close")
+            calls.append(("close", asyncio.current_task()))
+
+        async def specs():
+            calls.append(("specs", asyncio.current_task()))
+            return []
+
+        async def call(name, arguments):
+            calls.append(("call", asyncio.current_task()))
+            return f"{name}: {arguments['query']}"
 
         monkeypatch.setattr(bridge._client, "connect", connect)
         monkeypatch.setattr(bridge._client, "aclose", close)
+        monkeypatch.setattr(bridge._client, "tool_specs", specs)
+        monkeypatch.setattr(bridge._client, "call", call)
         bridge.start()
+        assert bridge.specs() == []
+        assert bridge.call("search", {"query": "qdrant"}) == "search: qdrant"
         bridge.stop()
 
-        assert calls == ["connect", "close"]
+        assert [name for name, _ in calls] == ["connect", "specs", "call", "close"]
+        assert all(task is calls[0][1] for _, task in calls)
         assert bridge._loop is None
     asyncio.run(scenario())
 
@@ -130,6 +165,30 @@ def test_mcp_tools_keep_remote_schema_and_call_async():
         assert await registry.acall("mcp_search", {"query": "billing"}) == (
             "search: billing"
         )
+    asyncio.run(scenario())
+
+def test_mcp_tool_specs_accepts_snake_case_input_schema():
+    async def scenario():
+        client = MCPClient(command="fake-server")
+        schema = {
+            "type": "object",
+            "properties": {"query": {"type": "string"}},
+        }
+
+        class SnakeCaseSession:
+            async def list_tools(self):
+                return SimpleNamespace(tools=[
+                    SimpleNamespace(
+                        name="search",
+                        description="Search remote docs",
+                        input_schema=schema,
+                    )
+                ])
+
+        client._session = SnakeCaseSession()
+        specs = await client.tool_specs()
+
+        assert specs[0].parameters == schema
     asyncio.run(scenario())
 
 def test_mcp_call_timeout_cancels_remote_request():
@@ -172,7 +231,7 @@ def test_mcp_close_has_timeout_and_marks_client_closed(monkeypatch):
         monkeypatch.setattr(client, "_session_factory", lambda: lambda *_: session)
         await client.connect()
 
-        with pytest.raises(asyncio.TimeoutError):
+        with pytest.raises(TimeoutError):
             await client.close()
         assert session.close_started.is_set()
         assert not client.connected

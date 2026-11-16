@@ -109,6 +109,32 @@ trust. For network transports, configure `MCPClient` with the server URL and
 supported transport. MCP tools can have real effects: review the server,
 restrict its permissions, and register only tools the agent should use.
 
+### Optional no-API-key web search
+
+For a concrete stdio example, the community-maintained
+[DuckDuckGo Search MCP Server](https://github.com/nickclyde/duckduckgo-mcp-server)
+provides web search without an API token. It requires `uvx` (provided by `uv`)
+and outbound internet access. Search availability can be affected by
+rate-limits or upstream blocking; the upstream recommends the `browser` extra
+for its search fallback.
+
+The server can be configured in `config.yaml` like this:
+
+```yaml
+mcp:
+  servers:
+    - command: uvx
+      args:
+        - --with
+        - "duckduckgo-mcp-server[browser]"
+        - duckduckgo-mcp-server
+```
+
+The example in `examples/05_qdrant_mcp_cache.py` uses the first configured
+server. Keep `servers: []` in the shared sample config unless this integration
+is wanted by default; personal GitHub tokens and other credentials belong in
+local environment variables, not the checked-in YAML.
+
 ## Other built-in pieces
 
 - **Cost-aware estimates:** Create a `CostManager`, initialize its public

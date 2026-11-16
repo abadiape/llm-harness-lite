@@ -36,4 +36,4 @@ agent:
   max_steps: 8
   budget_usd: 0.05
 mcp:
-  servers: []  # e.g. [{command: "npx", args: ["-y","@modelcontextprotocol/server-filesystem","/tmp"]}]
+  servers: []  # Configure an MCP server for your application; see docs/integrations.md

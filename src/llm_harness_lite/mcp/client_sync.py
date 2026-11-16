@@ -3,30 +3,13 @@ from __future__ import annotations
 
 import asyncio
 import threading
+from concurrent.futures import Future
 from typing import Any
 
 from llm_harness_lite.llm.types import ToolSpec
 
 from .client_async import MCPClient
 
-
-def _run_blocking(coro, loop: asyncio.AbstractEventLoop, timeout: float):
-    if not loop.is_running() or loop.is_closed():
-        coro.close()
-        raise RuntimeError("MCP event loop is not running")
-    try:
-        running_loop = asyncio.get_running_loop()
-    except RuntimeError:
-        running_loop = None
-    if running_loop is loop:
-        coro.close()
-        raise RuntimeError("MCP sync bridge cannot be called from its own event loop")
-    future = asyncio.run_coroutine_threadsafe(coro, loop)
-    try:
-        return future.result(timeout)
-    except TimeoutError:
-        future.cancel()
-        raise
 
 class PersistentMCP:
     """Keep one async MCP session open for synchronous callers."""
@@ -44,18 +27,22 @@ class PersistentMCP:
         )
         self._loop: asyncio.AbstractEventLoop | None = None
         self._thread: threading.Thread | None = None
+        self._commands: asyncio.Queue | None = None
+        self._ready: threading.Event | None = None
+        self._startup_error: Exception | None = None
 
     def start(self) -> PersistentMCP:
         if self._thread is not None and self._thread.is_alive():
             raise RuntimeError("MCP bridge is already running")
         loop = asyncio.new_event_loop()
         ready = threading.Event()
+        self._ready = ready
+        self._startup_error = None
 
         def serve():
             asyncio.set_event_loop(loop)
-            ready.set()
             try:
-                loop.run_forever()
+                loop.run_until_complete(self._serve())
             finally:
                 pending = asyncio.all_tasks(loop)
                 for task in pending:
@@ -69,23 +56,18 @@ class PersistentMCP:
         self._loop = loop
         self._thread = threading.Thread(target=serve, daemon=True)
         self._thread.start()
-        if not ready.wait(self._client.timeout):
+        if not ready.wait(self._client.timeout + 1):
             loop.call_soon_threadsafe(loop.stop)
             self._thread.join(self._client.timeout + 1)
             if self._thread.is_alive():
                 raise TimeoutError("MCP event loop failed to stop after startup timeout")
             self._loop, self._thread = None, None
             raise TimeoutError("MCP event loop failed to start")
-        connected = False
-        try:
-            _run_blocking(
-                self._client.connect(), loop, self._client.timeout + 1
-            )
-            connected = True
-            return self
-        finally:
-            if not connected:
-                self.stop()
+        if self._startup_error is not None:
+            self._thread.join(self._client.timeout + 1)
+            self._loop, self._thread = None, None
+            raise self._startup_error
+        return self
 
     def stop(self) -> None:
         loop, thread = self._loop, self._thread
@@ -93,32 +75,89 @@ class PersistentMCP:
             return
         try:
             if loop.is_running():
-                _run_blocking(
-                    self._client.aclose(), loop, self._client.timeout + 1
-                )
+                self._request("stop")
         finally:
-            if loop.is_running():
-                loop.call_soon_threadsafe(loop.stop)
             thread.join(self._client.timeout + 1)
+            if thread.is_alive():
+                if loop.is_running():
+                    loop.call_soon_threadsafe(loop.stop)
+                thread.join(self._client.timeout + 1)
             if thread.is_alive():
                 raise TimeoutError("MCP event loop did not stop in time")
             self._loop, self._thread = None, None
+            self._commands = None
+            self._ready = None
 
     def specs(self) -> list[ToolSpec]:
         if self._loop is None:
             raise RuntimeError("MCP bridge is not started")
-        return _run_blocking(
-            self._client.tool_specs(), self._loop, self._client.timeout + 1
-        )
+        return self._request("specs")
 
     def call(self, name: str, arguments: dict[str, Any]) -> str:
         if self._loop is None:
             raise RuntimeError("MCP bridge is not started")
-        return _run_blocking(
-            self._client.call(name, arguments),
-            self._loop,
-            self._client.timeout + 1,
+        return self._request("call", name, arguments)
+
+    async def _serve(self) -> None:
+        commands: asyncio.Queue = asyncio.Queue()
+        self._commands = commands
+        try:
+            await self._client.connect()
+        except Exception as exc:  # noqa: BLE001
+            self._startup_error = exc
+            if self._ready is not None:
+                self._ready.set()
+            return
+        if self._ready is not None:
+            self._ready.set()
+
+        try:
+            while True:
+                operation, args, response = await commands.get()
+                if not response.set_running_or_notify_cancel():
+                    continue
+                if operation == "stop":
+                    try:
+                        await self._client.aclose()
+                    except Exception as exc:  # noqa: BLE001
+                        response.set_exception(exc)
+                    else:
+                        response.set_result(None)
+                    return
+                try:
+                    if operation == "specs":
+                        result = await self._client.tool_specs()
+                    elif operation == "call":
+                        result = await self._client.call(*args)
+                    else:
+                        raise RuntimeError(f"unknown MCP bridge operation {operation!r}")
+                except Exception as exc:  # noqa: BLE001
+                    response.set_exception(exc)
+                else:
+                    response.set_result(result)
+        finally:
+            self._commands = None
+
+    def _request(self, operation: str, *args):
+        loop, commands = self._loop, self._commands
+        if loop is None or commands is None or not loop.is_running():
+            raise RuntimeError("MCP event loop is not running")
+        try:
+            running_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            running_loop = None
+        if running_loop is loop:
+            raise RuntimeError("MCP sync bridge cannot be called from its own event loop")
+
+        response = Future()
+        loop.call_soon_threadsafe(
+            commands.put_nowait, (operation, args, response)
         )
+        try:
+            return response.result(self._client.timeout + 1)
+        except TimeoutError:
+            response.cancel()
+            raise
 
     def register_into(self, registry, prefix: str = "") -> list[str]:
         registered = []

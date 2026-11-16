@@ -3,11 +3,37 @@ from __future__ import annotations
 
 import asyncio
 import math
-from contextlib import AsyncExitStack
+from contextlib import AsyncExitStack, asynccontextmanager
 from typing import Any
 
 from llm_harness_lite.llm.types import ToolSpec
 from llm_harness_lite.tools.registry import ToolExecutionError
+
+
+@asynccontextmanager
+async def _timeout_after(timeout: float):
+    task = asyncio.current_task()
+    if task is None:
+        raise RuntimeError("timeout requires a running asyncio task")
+    expired = False
+
+    def cancel_task():
+        nonlocal expired
+        expired = True
+        task.cancel()
+
+    handle = asyncio.get_running_loop().call_later(timeout, cancel_task)
+    try:
+        yield
+    except asyncio.CancelledError as exc:
+        if expired:
+            raise TimeoutError from exc
+        raise
+    else:
+        if expired:
+            raise TimeoutError
+    finally:
+        handle.cancel()
 
 
 class MCPClient:
@@ -47,22 +73,20 @@ class MCPClient:
             from mcp.client.stdio import stdio_client
 
             params = StdioServerParameters(command=self.command, args=self.args)
-            streams = await asyncio.wait_for(
-                stack.enter_async_context(stdio_client(params)), self.timeout
-            )
+            async with _timeout_after(self.timeout):
+                streams = await stack.enter_async_context(stdio_client(params))
             return streams
         if self.transport == "sse":
             from mcp.client.sse import sse_client
 
-            return await asyncio.wait_for(
-                stack.enter_async_context(sse_client(self.url)), self.timeout
-            )
+            async with _timeout_after(self.timeout):
+                return await stack.enter_async_context(sse_client(self.url))
         from mcp.client.streamable_http import streamablehttp_client
 
-        read, write, _ = await asyncio.wait_for(
-            stack.enter_async_context(streamablehttp_client(self.url)),
-            self.timeout,
-        )
+        async with _timeout_after(self.timeout):
+            read, write, _ = await stack.enter_async_context(
+                streamablehttp_client(self.url)
+            )
         return read, write
 
     def _session_factory(self):
@@ -79,18 +103,20 @@ class MCPClient:
         try:
             await stack.__aenter__()
             read, write = await self._enter_transport(stack)
-            session = await asyncio.wait_for(
-                stack.enter_async_context(self._session_factory()(read, write)),
-                self.timeout,
-            )
-            await asyncio.wait_for(session.initialize(), self.timeout)
+            async with _timeout_after(self.timeout):
+                session = await stack.enter_async_context(
+                    self._session_factory()(read, write)
+                )
+            async with _timeout_after(self.timeout):
+                await session.initialize()
             self._stack, self._session = stack, session
             connected = True
             return self
         finally:
             self._connecting = False
             if not connected:
-                await asyncio.wait_for(stack.aclose(), self.timeout)
+                async with _timeout_after(self.timeout):
+                    await stack.aclose()
 
     async def aclose(self) -> None:
         if self._connecting:
@@ -99,7 +125,8 @@ class MCPClient:
             return
         stack = self._stack
         try:
-            await asyncio.wait_for(stack.aclose(), self.timeout)
+            async with _timeout_after(self.timeout):
+                await stack.aclose()
         finally:
             self._stack, self._session = None, None
 
@@ -119,25 +146,26 @@ class MCPClient:
         return self._session
 
     async def tool_specs(self) -> list[ToolSpec]:
-        from_tools = await asyncio.wait_for(
-            self._require_session().list_tools(), self.timeout
-        )
+        async with _timeout_after(self.timeout):
+            from_tools = await self._require_session().list_tools()
         return [
             ToolSpec(
                 name=tool.name,
                 description=tool.description or tool.name,
-                parameters=tool.inputSchema or {"type": "object", "properties": {}},
+                parameters=(
+                    getattr(tool, "input_schema", None)
+                    or getattr(tool, "inputSchema", None)
+                    or {"type": "object", "properties": {}}
+                ),
             )
             for tool in from_tools.tools
         ]
 
     async def call(self, name: str, arguments: dict[str, Any]) -> str:
         try:
-            result = await asyncio.wait_for(
-                self._require_session().call_tool(name, arguments),
-                self.timeout,
-            )
-        except asyncio.TimeoutError as exc:
+            async with _timeout_after(self.timeout):
+                result = await self._require_session().call_tool(name, arguments)
+        except TimeoutError as exc:
             raise ToolExecutionError(
                 f"MCP tool {name!r} timed out after {self.timeout:g}s"
             ) from exc

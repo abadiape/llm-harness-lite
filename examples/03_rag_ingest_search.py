@@ -1,11 +1,12 @@
 """RAG starter: ingest a file → configured vector store → search → inject into prompt."""
 import yaml
 from dotenv import load_dotenv
+
 load_dotenv()
 import llm_harness_lite
 from llm_harness_lite.rag.embedder import OllamaEmbedder, OpenAIEmbedder
-from llm_harness_lite.rag.store_base import create_store
 from llm_harness_lite.rag.retriever import Retriever
+from llm_harness_lite.rag.store_base import create_store
 
 cfg = yaml.safe_load(open("config.yaml"))
 ecfg = cfg["embed"]
@@ -16,7 +17,8 @@ store = create_store(cfg["store"]["kind"], **store_cfg)
 store.init()
 ret = Retriever(emb, store, cfg["rag"]["chunk_size"], cfg["rag"]["chunk_overlap"])
 
-text = open("README.md").read()
+with open("README.md") as readme_file:
+      text = readme_file.read()
 print(f"ingested {ret.ingest(text, source='README.md')} chunks")
 q = "What does this harness do?"
 ctx = ret.context_block(q, top_k=cfg["rag"]["top_k_final"])

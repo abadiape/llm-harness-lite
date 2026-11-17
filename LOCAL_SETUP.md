@@ -6,6 +6,7 @@ for fast iteration. This guide is for local development, not production
 deployment.
 
 ## 1) Local RAG with pgvector
+
 ```bash
 docker compose up -d db
 docker ps   # 5432 = pgvector
@@ -16,6 +17,7 @@ PostgreSQL uses sample credentials and Qdrant has no authentication configured.
 Do not expose them to a network or use this Compose setup in production.
 
 ## 2) Python in venv (host)
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
@@ -93,6 +95,7 @@ See [Choosing an LLM and configuring your app](docs/configuration.md) for the
 provider settings.
 
 ## 4) Run
+
 ```bash
 python examples/01_basic_chat.py
 python examples/03_rag_ingest_search.py

@@ -2,11 +2,12 @@
 
 Local-first, vendor-neutral, cost-aware. Not the next LangChain: ~1k LOC core you can read in an afternoon.
 
-```
+```text
 config.yaml → llm/factory → agent/loop → tools/registry (+ RAG as tool, MCP tools)
 ```
 
 ## Install
+
 ```bash
 pip install llm-harness-lite                 # dependency-free core
 pip install "llm-harness-lite[openai]"       # OpenAI-compatible providers
@@ -95,6 +96,7 @@ llm = llm_harness_lite.create_llm("my-runtime", "model-name", endpoint="http://l
 ```
 
 ## Use
+
 ```python
 import llm_harness_lite
 
@@ -127,6 +129,7 @@ await does not forcibly stop the underlying synchronous function. Implement
 `achat()` or an async tool for cancellable I/O.
 
 See `LOCAL_SETUP.md` + `examples/`:
+
 - `01_basic_chat.py` — normalized `chat()` across providers
 - `02_agent_with_tools.py` — agent loop + budget guard
 - `03_rag_ingest_search.py` — pgvector RAG

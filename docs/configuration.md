@@ -3,17 +3,17 @@
 The harness does not automatically read `config.yaml`. Your application can
 choose to read a config file, environment variables, command-line options, or
 another settings source, then pass the values to `create_llm()` and `Agent`.
-For a first experiment, passing the provider and model directly is simplest.
+For a first test, passing the provider and model directly is the simplest choice.
 
 ## Provider choices
 
 | Provider | Extra | Typical setup |
-|---|---|---|
+| --- | --- | --- |
 | `openai` | `openai` | Set `OPENAI_API_KEY`. |
 | `anthropic` | `anthropic` | Set `ANTHROPIC_API_KEY`. |
 | `openrouter` | `openai` | Set `OPENROUTER_API_KEY`. |
 | `openai_compat` | `openai` | Set `base_url`; pass `api_key` if the endpoint requires one. Local endpoints can use a dummy key. |
-| `ollama`, `vllm`, `lmstudio` | `openai` | Set `base_url` to the endpoint; for example, Ollama commonly uses `http://localhost:11434/v1`. |
+| `ollama`, `vllm`, `lmstudio` | `openai` | Set `base_url` to the endpoint; for example, Ollama commonly uses the url: `http://localhost:11434/v1`. |
 
 Use the model identifier expected by the provider. `create_llm()` accepts
 provider-specific options such as `base_url`, `api_key`, `timeout`, and
@@ -34,7 +34,7 @@ llm = llm_harness_lite.create_llm(
 
 Install Ollama and pull the model separately; see
 [Local setup](../LOCAL_SETUP.md) for download, startup, and model commands.
-For hosted providers, keep API keys outside the YAML file and source them from
+For hosted providers, keep the API keys outside the YAML file and source them from
 environment variables or a secret manager.
 
 ## Optional YAML configuration
@@ -55,7 +55,7 @@ agent:
   budget_usd: 0.02
 ```
 
-Application code reads the file and passes the relevant values to the
+The application code reads the file and passes the relevant values to the
 harness:
 
 ```python

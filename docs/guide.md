@@ -81,7 +81,7 @@ llm = llm_harness_lite.create_llm(
 ```
 
 Choose one `create_llm()` call before constructing the agent. The examples
-above are alternatives, not calls to run one after another.
+above are alternatives, NOT calls to be serialized (run one after another).
 
 For Ollama, start the Ollama service and pull the model first. The supported
 provider names are `openai`, `anthropic`, `openrouter`, `openai_compat`,
@@ -112,7 +112,7 @@ and `agent` from step 2, register this before calling `agent.run()`:
 
 ```python
 specialist_tools = llm_harness_lite.ToolRegistry()
-# Register tools that should be available only to the specialist.
+# Register tools that should be available only to the specialist agent.
 specialist = llm_harness_lite.Agent(
     llm,
     specialist_tools,

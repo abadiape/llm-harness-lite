@@ -1,10 +1,12 @@
 """Agent loop with local python tools + RAG-as-tool pattern."""
 import yaml
 from dotenv import load_dotenv
-load_dotenv()
+
 import llm_harness_lite
 
-cfg = yaml.safe_load(open("config.yaml"))
+load_dotenv()
+
+cfg = yaml.safe_load(open("config.yaml"))  # noqa: SIM115
 llm = llm_harness_lite.create_llm(cfg["llm"]["provider"], cfg["llm"]["model"],
                  base_url=cfg["llm"].get("base_url"))
 reg = llm_harness_lite.ToolRegistry()

@@ -1,10 +1,12 @@
 """Normalized chat() — swap provider via config.yaml / env."""
-import os, yaml
+import yaml
 from dotenv import load_dotenv
+
 load_dotenv()
 import llm_harness_lite
 
-cfg = yaml.safe_load(open("config.yaml"))
+with open("config.yaml") as config_file:
+    cfg = yaml.safe_load(config_file)
 llm = llm_harness_lite.create_llm(cfg["llm"]["provider"], cfg["llm"]["model"],
                  base_url=cfg["llm"].get("base_url"))
 resp = llm.chat([llm_harness_lite.Message(role="user", content="Say hello in one line + name your model.")])

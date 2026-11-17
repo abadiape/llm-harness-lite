@@ -1,11 +1,14 @@
 """Bang-for-buck: same prompt across backends, print tokens/$/latency."""
 import yaml
 from dotenv import load_dotenv
+from openai import APIError
+
 import llm_harness_lite
 from llm_harness_lite.utils.costs import CostManager
 
 load_dotenv()
-cfg = yaml.safe_load(open("config.yaml"))
+with open("config.yaml") as config_file:
+    cfg = yaml.safe_load(config_file)
 cost_manager = CostManager.from_config(cfg.get("costs"))
 catalog_refreshed = cost_manager.initialize()
 print(f"Pricing catalog: {'refreshed' if catalog_refreshed else 'cached/fallback'}")
@@ -28,5 +31,5 @@ for provider, model, kw in MODELS:
             f"tok {r.usage.input_tokens}/{r.usage.output_tokens} | "
             f"${r.usage.cost_usd:.5f} | {r.usage.latency_s:.1f}s"
         )
-    except Exception as e:
+    except (APIError, ConnectionError, TimeoutError, ValueError) as e:
         print(f"\n== {model} FAILED: {e}")

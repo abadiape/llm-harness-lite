@@ -4,16 +4,18 @@ Run: docker compose up -d qdrant ; python examples/05_qdrant_mcp_cache.py
 """
 import yaml
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import llm_harness_lite
-from llm_harness_lite.rag.embedder import OllamaEmbedder
-from llm_harness_lite.rag.store_base import create_store
-from llm_harness_lite.rag.retriever import Retriever
-from llm_harness_lite.utils.cache import ChatCache, CachedLLM
 from llm_harness_lite.mcp.client import PersistentMCP
+from llm_harness_lite.rag.embedder import OllamaEmbedder
+from llm_harness_lite.rag.retriever import Retriever
+from llm_harness_lite.rag.store_base import create_store
+from llm_harness_lite.utils.cache import CachedLLM, ChatCache
 
-cfg = yaml.safe_load(open("config.yaml"))
+with open("config.yaml") as f:
+    cfg = yaml.safe_load(f)
 
 # 1) Qdrant store. Both supported stores work with the same Retriever.
 s = cfg["store"]["qdrant"]

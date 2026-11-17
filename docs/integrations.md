@@ -10,7 +10,7 @@ RAG has three application-level pieces: an embedder, a vector store, and a
 `Retriever`. The agent does not need to know about the database; expose the
 retrieval operation as a regular tool.
 
-This example uses Ollama embeddings and local PostgreSQL with pgvector:
+This example uses Ollama embeddings and a local PostgreSQL DB with pgvector:
 
 ```bash
 pip install "llm-harness-lite[ollama-embed,pgvector]"

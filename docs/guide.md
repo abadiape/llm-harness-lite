@@ -52,9 +52,14 @@ finally:
     llm.close()
 ```
 
-`@llm_harness_lite.tool(tools)` registers the function and derives a tool schema from its
-name, docstring, and annotated parameters. When the model requests that tool,
-the harness calls the Python function and sends its result back to the model.
+`@llm_harness_lite.tool(tools)` registers the function and derives its tool
+schema from the function name, docstring, parameter annotations, and defaults.
+Common annotations (`str`, `int`, `float`, `bool`, `list`, and `dict`) map to
+JSON Schema types; parameters without defaults are marked as required. The
+agent uses this same registry both to provide tool schemas to the model and to
+dispatch requested calls, so you do not need a separate schema list or
+name-to-function dispatch map. When the model requests a tool, the harness
+calls the registered Python function and sends its result back to the model.
 Replace the example dictionary with an application function that accesses only
 the data this agent is allowed to use.
 
@@ -62,6 +67,15 @@ The system prompt guides the model, but it is not an access-control boundary.
 Enforce permissions, validate inputs, and limit what each tool can do in the
 tool implementation. `max_steps` bounds the agent loop; `budget_usd` limits
 model spend when provider cost data is available.
+
+[`examples/02_agent_with_tools.py`](../examples/02_agent_with_tools.py) is the
+compact runnable agent-and-tool example. For a more involved local-tool
+example, see the
+[`large-files scanner`](../examples/06_large_files_scanner.py): it
+interactively scans a directory and offers to delete selected results.
+Deletion succeeds only when the running process has permission to remove the
+file. Permission failures are reported, and the example does not request
+elevated access.
 
 ## 3. Change the model without changing the agent
 

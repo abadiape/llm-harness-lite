@@ -8,7 +8,8 @@ from llm_harness_lite.rag.embedder import OllamaEmbedder, OpenAIEmbedder
 from llm_harness_lite.rag.retriever import Retriever
 from llm_harness_lite.rag.store_base import create_store
 
-cfg = yaml.safe_load(open("config.yaml"))
+with open("config.yaml", encoding="utf-8") as config_file:
+    cfg = yaml.safe_load(config_file)
 ecfg = cfg["embed"]
 emb = OllamaEmbedder(ecfg["model"], ecfg.get("base_url", "http://localhost:11434")) \
       if ecfg["provider"] == "ollama" else OpenAIEmbedder(ecfg["model"])

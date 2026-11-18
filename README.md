@@ -131,10 +131,12 @@ await does not forcibly stop the underlying synchronous function. Implement
 See `LOCAL_SETUP.md` + `examples/`:
 
 - `01_basic_chat.py` — normalized `chat()` across providers
-- `02_agent_with_tools.py` — agent loop + budget guard
-- `03_rag_ingest_search.py` — pgvector RAG
+- `02_agent_with_tools.py` — minimal agent loop with a registered tool
+- `03_rag_ingest_search.py` — compact pgvector ingest/search example
 - `04_cost_compare.py` — bang-for-buck across models
 - `05_qdrant_mcp_cache.py` — Qdrant + persistent MCP + semantic cache
+- `06_large_files_scanner.py` — expanded tool example: interactive local scan and confirmed deletion
+- `07_document_inquirer.py` — expanded RAG example: interactive Q&A over text files or PDFs
 
 ## User guide
 

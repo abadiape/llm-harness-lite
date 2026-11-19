@@ -66,6 +66,14 @@ existing rows.
 Run `docker compose up -d qdrant` only when testing the Qdrant path. The Qdrant
 client is available through the `qdrant` extra.
 
+## Model cost estimates
+
+Built-in backends estimate USD cost from reported input and output token usage.
+Supply per-model rates when you want to account for custom or local model
+pricing; those overrides take precedence over catalog and fallback prices.
+See [per-model cost estimates](docs/configuration.md#per-model-cost-estimates)
+for the configuration and calculation example.
+
 ## Explicit model routing
 
 `LLMRouter` dispatches through a caller-supplied policy; it does not silently
@@ -143,7 +151,7 @@ See `LOCAL_SETUP.md` + `examples/`:
 - [Build a purpose-specific agent](docs/guide.md) — start with one tool and
   grow the same agent in small steps
 - [Choose an LLM and configure your app](docs/configuration.md) — providers,
-  credentials, and optional YAML configuration
+  credentials, optional YAML configuration, and per-model cost estimates
 - [RAG and MCP integrations](docs/integrations.md) — add retrieval, remote
   tools, caching, and other optional capabilities
 

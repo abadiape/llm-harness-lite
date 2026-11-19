@@ -1,4 +1,4 @@
-"""Agent loop with local python tool which scanns for large files + optionally removing them."""
+"""Agent loop with local python tool which scans for large files + optionally removing them."""
 import json
 import math
 import os
@@ -34,7 +34,7 @@ scan_report: ScanReport | None = None
 @llm_harness_lite.tool(reg)
 def find_largest_files(directory: str, min_size_mib: float) -> str:
     """
-    Find files at least min_size_mib in size and return the 10 largest.
+    Find files at least min_size_mib in size and returns the 10 largest.
     """
     global scan_report
     scan_report = None

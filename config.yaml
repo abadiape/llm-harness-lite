@@ -31,7 +31,11 @@ costs:
   cache_path: ~/.cache/llm-harness-lite/openrouter-prices.json
   cache_ttl_seconds: 3600
   request_timeout_seconds: 2.0
-  overrides: {}
+  overrides:
+    # Set rates in USD per million tokens; see docs/configuration.md.
+    # "my-provider/my-model":
+    #   input_per_million: 1.25
+    #   output_per_million: 5.00
 agent:
   max_steps: 8
   budget_usd: 0.05

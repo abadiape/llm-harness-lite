@@ -147,9 +147,10 @@ local environment variables, not the checked-in YAML.
 
 ## Other built-in pieces
 
-- **Cost-aware estimates:** Create a `CostManager`, initialize its public
-  pricing catalog when appropriate, and pass it to `create_llm()`. See
-  [`examples/04_cost_compare.py`](../examples/04_cost_compare.py).
+- **Cost-aware estimates:** Pass a `CostManager` to `create_llm()` for
+  token-based USD estimates. You can provide per-model input/output rates;
+  see [per-model cost estimates](configuration.md#per-model-cost-estimates)
+  and [`examples/04_cost_compare.py`](../examples/04_cost_compare.py).
 - **Caching:** `CachedLLM` can wrap a backend with exact or optional semantic
   caching. See [`examples/05_qdrant_mcp_cache.py`](../examples/05_qdrant_mcp_cache.py).
 - **Routing:** `LLMRouter` selects among configured backends through a

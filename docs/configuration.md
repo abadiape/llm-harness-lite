@@ -86,6 +86,43 @@ file format. Add fields only when your application uses them. For example,
 RAG settings belong in config only if your application creates an embedder,
 vector store, and retriever; see [RAG and MCP integrations](integrations.md).
 
+## Per-model cost estimates
+
+Built-in backends estimate cost from the input and output token counts reported
+by the provider. To set the rates for a particular model, add an override under
+`costs.overrides`. Rates are in **USD per million tokens**:
+
+```yaml
+costs:
+  overrides:
+    "my-provider/my-model":
+      input_per_million: 1.25
+      output_per_million: 5.00
+```
+
+Replace the example model ID and rates with the ID used by `create_llm()` and
+the prices for that model. For example, 1,000 input tokens and 500 output
+tokens at these rates cost $0.00375. Overrides take precedence over OpenRouter
+catalog prices and built-in fallback prices.
+
+Load the override into a `CostManager` and pass it to `create_llm()`:
+
+```python
+from llm_harness_lite.utils.costs import CostManager
+
+cost_manager = CostManager.from_config(cfg.get("costs"))
+llm = llm_harness_lite.create_llm(
+    cfg["llm"]["provider"],
+    cfg["llm"]["model"],
+    cost_manager=cost_manager,
+)
+```
+
+An override is used without calling `cost_manager.initialize()`; call it when
+you also want to fetch the OpenRouter pricing catalog. Local
+OpenAI-compatible endpoints report nonzero cost only when the model has an
+override.
+
 ## Secrets and local environment
 
 Do not commit API keys, database passwords, or other credentials. Set provider

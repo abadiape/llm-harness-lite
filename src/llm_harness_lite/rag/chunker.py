@@ -1,4 +1,4 @@
-"""Deterministic char-based chunker with overlap. Swap for token-based later."""
+"""Deterministic character-based chunker with overlap."""
 from __future__ import annotations
 
 from dataclasses import dataclass

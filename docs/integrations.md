@@ -65,9 +65,9 @@ supports Qdrant. For runnable examples, see
 [`examples/03_rag_ingest_search.py`](../examples/03_rag_ingest_search.py) for
 compact pgvector ingest/search and
 [`examples/05_qdrant_mcp_cache.py`](../examples/05_qdrant_mcp_cache.py) for
-Qdrant with MCP. The document inquirer below extends the RAG workflow with
-interactive document Q&A. Keep retrieved content within the user's
-authorization scope, and treat document text as untrusted input.
+Qdrant with MCP. The document inquirer below (../examples/07_document_inquirer.py)
+extends the RAG workflow with interactive document Q&A. Keep retrieved content within
+the user's authorization scope, and treat document text as untrusted input.
 
 [`examples/07_document_inquirer.py`](../examples/07_document_inquirer.py)
 prompts for a UTF-8 text file or a text-based PDF, ingests its contents, then

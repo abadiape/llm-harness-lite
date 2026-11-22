@@ -6,6 +6,37 @@ Local-first, vendor-neutral, cost-aware. Not the next LangChain: ~1k LOC core yo
 config.yaml → llm/factory → agent/loop → tools/registry (+ RAG as tool, MCP tools)
 ```
 
+> **0.1.0 Feedback Welcome:** This is an early release focused on clean primitives, explicit routing, and readable internals rather than heavyweight abstractions. If you spot rough edges in the async loop, MCP lifecycle, routing/cache semantics, or API ergonomics, please open an issue or start a thread in Discussions.
+
+## Quick Example
+
+```python
+import asyncio
+from llm_harness_lite import Agent, ToolRegistry, create_llm, tool
+
+
+registry = ToolRegistry()
+
+
+@tool(registry)
+def add_numbers(a: int, b: int) -> int:
+    """Add two integers together."""
+    return a + b
+
+
+async def main() -> None:
+    llm = create_llm("openai_compat", "qwen3:8b", base_url="http://localhost:11434/v1")
+    async with llm:
+        agent = Agent(llm=llm, registry=registry)
+        result = await agent.arun("What is 17 + 25?")
+        print(result.answer, result.stop_reason, result.usage)
+
+
+asyncio.run(main())
+```
+
+```See examples/ (01_basic_chat.py through 07_document_inquirer.py) and LOCAL_SETUP.md for full workflows covering RAG, MCP, caching, and cost comparisons.```
+
 ## Install
 
 ```bash

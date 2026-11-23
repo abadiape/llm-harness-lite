@@ -117,6 +117,39 @@ When your application owns the backend lifecycle, close it with
 `await llm.aclose()` after use. See [RAG and MCP integrations](integrations.md)
 for an async example that also manages an MCP connection.
 
+## Track skill outputs
+
+Skills own artifact generation and presentation. The harness can track their
+output metadata and export a manifest without reading, generating, or serving
+the files:
+
+```python
+from pathlib import Path
+
+from llm_harness_lite import Artifact, ArtifactRegistry, ArtifactType, SkillResult
+
+outputs = Path("outputs")
+outputs.mkdir(exist_ok=True)
+report_path = outputs / "summary.md"
+report_path.write_text("# Repository summary\n", encoding="utf-8")
+
+artifacts = ArtifactRegistry()
+artifacts.register(
+    Artifact(
+        name="Repository summary",
+        type=ArtifactType.MARKDOWN,
+        path=report_path,
+        description="A brief repository overview",
+    )
+)
+result = SkillResult(summary="Repository analysis completed", artifacts=artifacts.list_artifacts())
+artifacts.export_manifest(outputs / "manifest.json")
+```
+
+`ArtifactType` provides common format names; `Artifact.type` also accepts other
+strings for application-specific formats. Artifact paths are metadata and are
+not restricted to `outputs/`.
+
 ## Optional: Add a sub-agent for a distinct job
 
 Most applications can grow one agent by adding focused tools. If a specialist
